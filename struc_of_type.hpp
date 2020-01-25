@@ -12,25 +12,25 @@
 #include <stdio.h>
 #include <string>
 
-class Operand8
+class Int8
 {
     public :
-        Operand8();
-        ~Operand8();
+        Int8();
+        ~Int8();
 };
 
-class Operand16
+class Int16
 {
     public :
-        Operand16();
-        ~Operand16();
+        Int16();
+        ~Int16();
 };
 
-class Operand32
+class Int32
 {
     public :
-        Operand32();
-        ~Operand32();
+        Int32();
+        ~Int32();
 };
 
 #endif /* struc_of_type_hpp */

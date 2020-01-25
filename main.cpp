@@ -9,6 +9,8 @@
 #include <iostream>
 #include <cstdint>
 #include "TOperand.hpp"
+#include <float.h>
+
 
 using namespace std;
 
@@ -28,32 +30,41 @@ int main(int argc, const char * argv[]) {
     cout << results->toString();
     cout << endl;
     cout << endl;
+
 */
-    
-   Operand<class Int16> operand2(9);
-    cout << operand2.toString();
+   Operand<typename::int8_t> operand(9);
+    cout << operand.toString();
     cout << endl;
     cout << endl;
-    Operand<class Int8> operand3(8);
-    cout << operand3.toString();
+    Operand<typename::int8_t> operand1(8);
+    cout << operand1.toString();
     cout << endl;
     cout << endl;
     
     IOperand* results(0);
-    results = operand2 + operand3;
+    results = operand % operand1;
     cout << results->toString();
     cout << endl;
     cout << endl;
     
-    Operand<class Int32> operand4(4000);
-    cout << operand4.toString();
+    Operand<typename::int32_t> operand2(4000);
+    cout << operand2.toString();
     cout << endl;
     cout << endl;
     
+
+    Operand<float> operand3(0.1);
+    cout << operand3.toString();
+    cout << endl;
+    cout << endl;
     
-    results = operand3 + operand4;
-    cout << results->toString();
+    IOperand* results1(0);
+    results1 = operand2 / operand3;
+    cout << results1->toString();
+    cout << endl;
+    cout << endl;
     
+
     return 0;
 }
 

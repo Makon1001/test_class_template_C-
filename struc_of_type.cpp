@@ -12,17 +12,17 @@
 
 using namespace std;
 
-/* ############   Operand8     ###############*/
-Operand8::Operand8(){}
-Operand8::~Operand8(){}
+/* ############   Int8     ###############*/
+Int8::Int8(){}
+Int8::~Int8(){}
 
-/* ############   Operand16     ###############*/
-Operand16::Operand16(){}
-Operand16::~Operand16(){}
+/* ############   Int16     ###############*/
+Int16::Int16(){}
+Int16::~Int16(){}
 
-/* ############   Operand32    ###############*/
-Operand32::Operand32(){}
-Operand32::~Operand32(){}
+/* ############   Int32    ###############*/
+Int32::Int32(){}
+Int32::~Int32(){}
 
 
 

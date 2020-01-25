@@ -16,100 +16,115 @@
 #include "IOperand.hpp"
 #include "EnumParser.h"
 #include <stdexcept>
+#include <cstdint>
+#include <limits>
+#include <float.h>
 
-template <class T>
+template <typename T>
 class Operand : public IOperand
 {
     public :
-        Operand(double val = 0);
+        Operand(long double val = 0);
         ~Operand();
-        int getMaxValue() const;
-        int getMinValue() const;
-        void setValue(double value) override;
-        int getValue() const override;
+        T getMaxValue() const;
+        T getMinValue() const;
+        void setValue(T value);
+        long double getValue() const override;
         eOperandType getType() const override;
         std::string getTypeString() const;
         int getPrecision() const;
         std::string toString() const override;
         IOperand* operator+(const IOperand& rhs) const override;
+        IOperand* operator-(const IOperand& rhs) const override;
+        IOperand* operator*(const IOperand& rhs) const override;
+        IOperand* operator/(const IOperand& rhs) const override;
+        IOperand* operator%(const IOperand& rhs) const override;
     private :
         std::string Type;
-        double min_value;
-        double max_value;
+        T min_value;
+        T max_value;
         int precision;
-        int value;
+        T value;
 };
 
-template <class T>
-Operand<T>::Operand(double val){
+template <typename T>
+Operand<T>::Operand(long double val){
     setValue(val);
 }
 
 
-template<> Operand<class Int8>::Operand(double val): Type("int8"), min_value(-128), max_value(127), precision(0){
+template<> Operand<typename::int8_t>::Operand(long double val): Type("int8"), min_value(std::numeric_limits<int8_t>::min()), max_value(std::numeric_limits<int8_t>::max()), precision(0){
     setValue(val);
     std::cout << "Constructeur Operand8a" << std::endl;
 }
 
-template<> Operand<class Int16>::Operand(double val): Type("int16"), min_value(-32768), max_value(32767), precision(0){
+template<> Operand<typename::int16_t>::Operand(long double val): Type("int16"), min_value(std::numeric_limits<int16_t>::min()), max_value(std::numeric_limits<int16_t>::max()), precision(0){
     setValue(val);
     std::cout << "Constructeur Operand16a" << std::endl;
 }
 
-template <> Operand<class Int32>::Operand(double val): Type("int32"), min_value(-2147483648), max_value(2147483647), precision(0){
+template <> Operand<typename::int32_t>::Operand(long double val): Type("int32"), min_value(std::numeric_limits<int32_t>::min()), max_value(std::numeric_limits<int32_t>::max()), precision(0){
     setValue(val);
     std::cout << "Constructeur Operand32a" << std::endl;
 }
 
+template <> Operand<float>::Operand(long double val): Type("float"), min_value(-FLT_MAX), max_value(+FLT_MAX + 1), precision(7){
+    setValue(val);
+    std::cout << "Constructeur OperandFloat" << std::endl;
+}
 
-template <class T>
-Operand<T>::~Operand(){}
 
-template <class T>
-int Operand<T>::getMaxValue() const
+template <typename T>
+Operand<T>::~Operand(){
+}
+
+template <typename T>
+T Operand<T>::getMaxValue() const
 {
     return this->max_value;
 }
 
-template <class T>
-int Operand<T>::getMinValue() const
+template <typename T>
+T Operand<T>::getMinValue() const
 {
     return this->min_value;
 }
 
-template <class T>
-int Operand<T>::getValue() const
+template <typename T>
+long double Operand<T>::getValue() const
 {
     return this->value;
 }
 
-template <class T>
+template <typename T>
 std::string Operand<T>::getTypeString() const
 {
     return this->Type;
 }
 
-template <class T>
+template <typename T>
 int Operand<T>::getPrecision() const
 {
     return this->precision;
 }
 
-template <class T>
-void Operand<T>::setValue(double val)
+template <typename T>
+void Operand<T>::setValue(T val)
 {
-    if(val > this->max_value){
-        throw std::overflow_error("Overflow Error");
+    std::cout <<"value : "<< val << std::endl;
+    
+    if(val > this->getMaxValue()){
+       throw std::overflow_error("Overflow Error");
         this->value = 0;
-    } else if (value < this->min_value){
-        throw std::underflow_error("Underflow Error");
+    } else if (val < this->getMinValue()){
+       throw std::underflow_error("Underflow Error");
         this->value = 0;
     } else {
         this->value = val;
     }
 }
 
-template <class T>
+template <typename T>
 eOperandType Operand<T>::getType() const
 {
     EnumParser<eOperandType> TypeParser;
@@ -117,10 +132,11 @@ eOperandType Operand<T>::getType() const
     return index_of_eOperandType;
 }
 
-template <class T>
+template <typename T>
 std::string Operand<T>::toString() const
 {
     std::string describtion;
+    
     describtion = "Value : " + std::to_string(this->getValue()) + "\n"
                 + "Type : " + this->getTypeString() + "\n"
                 + "Max value : " + std::to_string(this->getMaxValue()) + "\n"
@@ -129,26 +145,142 @@ std::string Operand<T>::toString() const
     return describtion;
 }
 
-template <class T>
+template <typename T>
 IOperand* Operand<T>::operator+(const IOperand& rhs) const
 {
     eOperandType defineType(typeAnalyse(this->getType(), rhs.getType()));
-    if(defineType == Int8){
-        Operand<class Int8> *result = new Operand<class Int8>;
+    
+   if(defineType == Int8){
+        Operand<typename::int8_t>* result = new Operand<typename::int8_t>;
         result->setValue(this->getValue() + rhs.getValue());
         return result;
     } else if (defineType == Int16){
-        Operand<class Int16> *result16 = new Operand<class Int16>;
+        Operand<typename::int16_t> *result16 = new Operand<typename::int16_t>;
         result16->setValue(this->getValue() + rhs.getValue());
         return result16;
-    } else {
-        Operand<class Int32> *result32 = new Operand<class Int32>;
+    } else if (defineType == Int32){
+        Operand<typename::int32_t> *result32 = new Operand<typename::int32_t>;
         result32->setValue(this->getValue() + rhs.getValue());
         return result32;
+    } else {
+       Operand<float> *resultFloat = new Operand<float>;
+        resultFloat->setValue(this->getValue() + rhs.getValue());
+        return resultFloat;
     }
 
-                return nullptr;
+    return nullptr;
 }
+
+template <typename T>
+IOperand* Operand<T>::operator-(const IOperand& rhs) const
+{
+    eOperandType defineType(typeAnalyse(this->getType(), rhs.getType()));
+    
+   if(defineType == Int8){
+        Operand<typename::int8_t>* result = new Operand<typename::int8_t>;
+        result->setValue(this->getValue() - rhs.getValue());
+        return result;
+    } else if (defineType == Int16){
+        Operand<typename::int16_t> *result16 = new Operand<typename::int16_t>;
+        result16->setValue(this->getValue() - rhs.getValue());
+        return result16;
+    } else if (defineType == Int32){
+        Operand<typename::int32_t> *result32 = new Operand<typename::int32_t>;
+        result32->setValue(this->getValue() - rhs.getValue());
+        return result32;
+    } else {
+       Operand<float> *resultFloat = new Operand<float>;
+        resultFloat->setValue(this->getValue() - rhs.getValue());
+        return resultFloat;
+    }
+
+    return nullptr;
+}
+
+template <typename T>
+IOperand* Operand<T>::operator*(const IOperand& rhs) const
+{
+    eOperandType defineType(typeAnalyse(this->getType(), rhs.getType()));
+    
+   if(defineType == Int8){
+        Operand<typename::int8_t>* result = new Operand<typename::int8_t>;
+        result->setValue(this->getValue() * rhs.getValue());
+        return result;
+    } else if (defineType == Int16){
+        Operand<typename::int16_t> *result16 = new Operand<typename::int16_t>;
+        result16->setValue(this->getValue() * rhs.getValue());
+        return result16;
+    } else if (defineType == Int32){
+        Operand<typename::int32_t> *result32 = new Operand<typename::int32_t>;
+        result32->setValue(this->getValue() * rhs.getValue());
+        return result32;
+    } else {
+       Operand<float> *resultFloat = new Operand<float>;
+        resultFloat->setValue(this->getValue() * rhs.getValue());
+        return resultFloat;
+    }
+    return nullptr;
+}
+
+template <typename T>
+IOperand* Operand<T>::operator/(const IOperand& rhs) const
+{
+    eOperandType defineType(typeAnalyse(this->getType(), rhs.getType()));
+    if(rhs.getValue() == 0){
+        throw std::overflow_error("Error : Division by zero");
+    }
+    
+   if(defineType == Int8){
+        Operand<typename::int8_t>* result = new Operand<typename::int8_t>;
+        result->setValue(this->getValue() / rhs.getValue());
+        return result;
+    } else if (defineType == Int16){
+        Operand<typename::int16_t> *result16 = new Operand<typename::int16_t>;
+        result16->setValue(this->getValue() / rhs.getValue());
+        return result16;
+    } else if (defineType == Int32){
+        Operand<typename::int32_t> *result32 = new Operand<typename::int32_t>;
+        result32->setValue(this->getValue() / rhs.getValue());
+        return result32;
+    } else {
+       Operand<float> *resultFloat = new Operand<float>;
+        resultFloat->setValue(this->getValue() / rhs.getValue());
+        return resultFloat;
+    }
+    return nullptr;
+}
+
+template <typename T>
+IOperand* Operand<T>::operator%(const IOperand& rhs) const
+{
+    eOperandType defineType(typeAnalyse(this->getType(), rhs.getType()));
+    if(rhs.getValue() == 0){
+        throw std::overflow_error("Error : modulo by zero.");
+    }
+    if(this->getType() > Int32 || rhs.getType() > Int32) {
+        throw std::overflow_error("Error : modulo with non integer number.");
+    }
+    
+   if(defineType == Int8){
+        Operand<typename::int8_t>* result = new Operand<typename::int8_t>;
+        result->setValue(this->getValue() / rhs.getValue());
+        return result;
+    } else if (defineType == Int16){
+        Operand<typename::int16_t> *result16 = new Operand<typename::int16_t>;
+        result16->setValue(this->getValue() / rhs.getValue());
+        return result16;
+    } else if (defineType == Int32){
+        Operand<typename::int32_t> *result32 = new Operand<typename::int32_t>;
+        result32->setValue(this->getValue() / rhs.getValue());
+        return result32;
+    } else {
+       Operand<float> *resultFloat = new Operand<float>;
+        resultFloat->setValue(this->getValue() / rhs.getValue());
+        return resultFloat;
+    }
+    return nullptr;
+}
+
 
 eOperandType typeAnalyse( eOperandType a, eOperandType b)
 {
